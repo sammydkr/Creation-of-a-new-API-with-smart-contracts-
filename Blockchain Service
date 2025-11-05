@@ -1,0 +1,144 @@
+// src/services/blockchainService.js
+const ethersConfig = require('../config/ethersConfig');
+
+class BlockchainService {
+    constructor() {
+        this.provider = ethersConfig.getProvider();
+    }
+
+    // Get ETH balance of an address
+    async getEthBalance(address) {
+        try {
+            const balance = await this.provider.getBalance(address);
+            return {
+                address: address,
+                balance: ethers.formatEther(balance),
+                balanceWei: balance.toString()
+            };
+        } catch (error) {
+            throw new Error(`Failed to get ETH balance: ${error.message}`);
+        }
+    }
+
+    // Get ERC-20 token information
+    async getTokenInfo(tokenAddress) {
+        try {
+            // Minimal ERC-20 ABI
+            const erc20Abi = [
+                "function name() view returns (string)",
+                "function symbol() view returns (string)",
+                "function decimals() view returns (uint8)",
+                "function totalSupply() view returns (uint256)"
+            ];
+
+            const contract = ethersConfig.getContract(tokenAddress, erc20Abi);
+            
+            const [name, symbol, decimals, totalSupply] = await Promise.all([
+                contract.name(),
+                contract.symbol(),
+                contract.decimals(),
+                contract.totalSupply()
+            ]);
+
+            return {
+                contractAddress: tokenAddress,
+                name: name,
+                symbol: symbol,
+                decimals: decimals,
+                totalSupply: totalSupply.toString(),
+                totalSupplyFormatted: ethers.formatUnits(totalSupply, decimals)
+            };
+        } catch (error) {
+            throw new Error(`Failed to get token info: ${error.message}`);
+        }
+    }
+
+    // Get wallet token balances
+    async getWalletTokens(walletAddress, tokenAddresses) {
+        try {
+            const erc20Abi = [
+                "function balanceOf(address) view returns (uint256)",
+                "function decimals() view returns (uint8)",
+                "function symbol() view returns (string)"
+            ];
+
+            const results = [];
+            
+            for (const tokenAddress of tokenAddresses) {
+                try {
+                    const contract = ethersConfig.getContract(tokenAddress, erc20Abi);
+                    const [balance, decimals, symbol] = await Promise.all([
+                        contract.balanceOf(walletAddress),
+                        contract.decimals(),
+                        contract.symbol()
+                    ]);
+
+                    results.push({
+                        tokenAddress: tokenAddress,
+                        symbol: symbol,
+                        balance: balance.toString(),
+                        balanceFormatted: ethers.formatUnits(balance, decimals),
+                        decimals: decimals
+                    });
+                } catch (error) {
+                    results.push({
+                        tokenAddress: tokenAddress,
+                        error: `Failed to fetch: ${error.message}`
+                    });
+                }
+            }
+
+            return results;
+        } catch (error) {
+            throw new Error(`Failed to get wallet tokens: ${error.message}`);
+        }
+    }
+
+    // Get block information
+    async getBlockInfo(blockNumber = 'latest') {
+        try {
+            const block = await this.provider.getBlock(blockNumber);
+            return {
+                blockNumber: block.number,
+                hash: block.hash,
+                timestamp: block.timestamp,
+                transactionCount: block.transactions.length,
+                miner: block.miner,
+                gasLimit: block.gasLimit.toString(),
+                gasUsed: block.gasUsed.toString()
+            };
+        } catch (error) {
+            throw new Error(`Failed to get block info: ${error.message}`);
+        }
+    }
+
+    // Get transaction details
+    async getTransaction(txHash) {
+        try {
+            const tx = await this.provider.getTransaction(txHash);
+            if (!tx) {
+                throw new Error('Transaction not found');
+            }
+
+            const receipt = await this.provider.getTransactionReceipt(txHash);
+
+            return {
+                hash: tx.hash,
+                blockNumber: tx.blockNumber,
+                from: tx.from,
+                to: tx.to,
+                value: ethers.formatEther(tx.value),
+                gasPrice: tx.gasPrice.toString(),
+                gasLimit: tx.gasLimit.toString(),
+                nonce: tx.nonce,
+                data: tx.data,
+                status: receipt ? (receipt.status === 1 ? 'Success' : 'Failed') : 'Unknown',
+                gasUsed: receipt ? receipt.gasUsed.toString() : 'Unknown'
+            };
+        } catch (error) {
+            throw new Error(`Failed to get transaction: ${error.message}`);
+        }
+    }
+}
+
+module.exports = new BlockchainService();

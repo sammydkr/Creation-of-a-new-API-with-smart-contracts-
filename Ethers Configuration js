@@ -1,0 +1,34 @@
+// src/config/ethersConfig.js
+const { ethers } = require('ethers');
+require('dotenv').config();
+
+class EthersConfig {
+    constructor() {
+        this.provider = new ethers.JsonRpcProvider(
+            process.env.RPC_URL || 'https://mainnet.infura.io/v3/your-project-id'
+        );
+        
+        // Optional: If you need to write to contracts
+        if (process.env.PRIVATE_KEY) {
+            this.wallet = new ethers.Wallet(process.env.PRIVATE_KEY, this.provider);
+        }
+    }
+
+    getProvider() {
+        return this.provider;
+    }
+
+    getWallet() {
+        return this.wallet;
+    }
+
+    // Create contract instance
+    getContract(address, abi) {
+        if (this.wallet) {
+            return new ethers.Contract(address, abi, this.wallet);
+        }
+        return new ethers.Contract(address, abi, this.provider);
+    }
+}
+
+module.exports = new EthersConfig();

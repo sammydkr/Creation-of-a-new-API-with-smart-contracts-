@@ -1,0 +1,41 @@
+// src/app.js
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.use('/api/blockchain', require('./routes/blockchainRoutes'));
+
+// Default route
+app.get('/', (req, res) => {
+    res.json({
+        message: '🚀 SEMIH Apitest Backend Server is Running!',
+        version: '1.0.0',
+        endpoints: {
+            blockchain: '/api/blockchain',
+            health: '/api/blockchain/health',
+            examples: {
+                ethBalance: '/api/blockchain/balance/eth/0x742d35Cc6634C0532925a3b8D6B3985d5A9b9c',
+                tokenInfo: '/api/blockchain/token/info/0xdAC17F958D2ee523a2206206994597C13D831ec7',
+                blockInfo: '/api/blockchain/block/latest'
+            }
+        }
+    });
+});
+
+// Start server
+app.listen(PORT, () => {
+    console.log(`🎯 SEMIH Apitest Server running on port ${PORT}`);
+    console.log(`🔗 Blockchain API available at: http://localhost:${PORT}/api/blockchain`);
+    console.log(`📚 Try these example endpoints:`);
+    console.log(`   • ETH Balance: http://localhost:${PORT}/api/blockchain/balance/eth/0x742d35Cc6634C0532925a3b8D6B3985d5A9b9c`);
+    console.log(`   • USDT Token Info: http://localhost:${PORT}/api/blockchain/token/info/0xdAC17F958D2ee523a2206206994597C13D831ec7`);
+    console.log(`   • Latest Block: http://localhost:${PORT}/api/blockchain/block/latest`);
+});

@@ -1,0 +1,27 @@
+// src/routes/blockchainRoutes.js
+const express = require('express');
+const router = express.Router();
+const blockchainController = require('../controllers/blockchainController');
+
+// ETH Balance routes
+router.get('/balance/eth/:address', blockchainController.getEthBalance);
+
+// Token routes
+router.get('/token/info/:contractAddress', blockchainController.getTokenInfo);
+router.post('/wallet/tokens/:walletAddress', blockchainController.getWalletTokens);
+
+// Blockchain data routes
+router.get('/block/:blockNumber?', blockchainController.getBlockInfo);
+router.get('/transaction/:txHash', blockchainController.getTransaction);
+
+// Health check
+router.get('/health', (req, res) => {
+    console.log('✅ Blockchain API Health Check - OK');
+    res.json({ 
+        success: true, 
+        message: 'SEMIH Apitest Blockchain API is running!',
+        timestamp: new Date().toISOString()
+    });
+});
+
+module.exports = router;

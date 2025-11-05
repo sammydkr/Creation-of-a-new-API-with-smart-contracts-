@@ -1,0 +1,9 @@
+# Server Configuration
+PORT=3000
+
+# Blockchain RPC Configuration
+RPC_URL=https://mainnet.infura.io/v3/your-project-id
+# Or use Alchemy: https://eth-mainnet.g.alchemy.com/v2/your-api-key
+
+# Optional: For write operations (keep this secure!)
+PRIVATE_KEY=123

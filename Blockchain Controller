@@ -1,0 +1,146 @@
+// src/controllers/blockchainController.js
+const blockchainService = require('../services/blockchainService');
+
+class BlockchainController {
+    async getEthBalance(req, res) {
+        try {
+            const { address } = req.params;
+            
+            if (!ethers.isAddress(address)) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid Ethereum address'
+                });
+            }
+
+            const balanceInfo = await blockchainService.getEthBalance(address);
+            
+            // Log to console as requested
+            console.log('🔗 ETH Balance API Result:', JSON.stringify(balanceInfo, null, 2));
+
+            res.json({
+                success: true,
+                data: balanceInfo
+            });
+        } catch (error) {
+            console.error('❌ ETH Balance Error:', error.message);
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+    }
+
+    async getTokenInfo(req, res) {
+        try {
+            const { contractAddress } = req.params;
+            
+            if (!ethers.isAddress(contractAddress)) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid contract address'
+                });
+            }
+
+            const tokenInfo = await blockchainService.getTokenInfo(contractAddress);
+            
+            // Log to console as requested
+            console.log('🔗 Token Info API Result:', JSON.stringify(tokenInfo, null, 2));
+
+            res.json({
+                success: true,
+                data: tokenInfo
+            });
+        } catch (error) {
+            console.error('❌ Token Info Error:', error.message);
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+    }
+
+    async getWalletTokens(req, res) {
+        try {
+            const { walletAddress } = req.params;
+            const { tokens } = req.body; // Array of token addresses
+            
+            if (!ethers.isAddress(walletAddress)) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid wallet address'
+                });
+            }
+
+            if (!tokens || !Array.isArray(tokens)) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Tokens array is required'
+                });
+            }
+
+            const tokenBalances = await blockchainService.getWalletTokens(walletAddress, tokens);
+            
+            // Log to console as requested
+            console.log('🔗 Wallet Tokens API Result:', JSON.stringify(tokenBalances, null, 2));
+
+            res.json({
+                success: true,
+                data: {
+                    walletAddress,
+                    tokens: tokenBalances
+                }
+            });
+        } catch (error) {
+            console.error('❌ Wallet Tokens Error:', error.message);
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+    }
+
+    async getBlockInfo(req, res) {
+        try {
+            const { blockNumber } = req.params;
+            const blockInfo = await blockchainService.getBlockInfo(blockNumber);
+            
+            // Log to console as requested
+            console.log('🔗 Block Info API Result:', JSON.stringify(blockInfo, null, 2));
+
+            res.json({
+                success: true,
+                data: blockInfo
+            });
+        } catch (error) {
+            console.error('❌ Block Info Error:', error.message);
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+    }
+
+    async getTransaction(req, res) {
+        try {
+            const { txHash } = req.params;
+            const transaction = await blockchainService.getTransaction(txHash);
+            
+            // Log to console as requested
+            console.log('🔗 Transaction API Result:', JSON.stringify(transaction, null, 2));
+
+            res.json({
+                success: true,
+                data: transaction
+            });
+        } catch (error) {
+            console.error('❌ Transaction Error:', error.message);
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+    }
+}
+
+module.exports = new BlockchainController();

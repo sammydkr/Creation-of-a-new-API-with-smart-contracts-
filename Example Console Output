@@ -1,0 +1,14 @@
+🔗 ETH Balance API Result: {
+  "address": "0x742d35Cc6634C0532925a3b8D6B3985d5A9b9c",
+  "balance": "15.742893",
+  "balanceWei": "15742893000000000000"
+}
+
+🔗 Token Info API Result: {
+  "contractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+  "name": "Tether USD",
+  "symbol": "USDT",
+  "decimals": 6,
+  "totalSupply": "40000000000000",
+  "totalSupplyFormatted": "40000000000.0"
+}
